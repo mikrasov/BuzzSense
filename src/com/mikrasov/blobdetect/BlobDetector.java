@@ -1,7 +1,9 @@
-package com.mikrasov.sensing;
+package com.mikrasov.blobdetect;
 
-import java.util.ArrayList;
-import java.util.List;
+import org.opencv.core.Core;
+import org.opencv.core.Mat;
+import org.opencv.core.Point;
+import org.opencv.core.Scalar;
 
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -12,55 +14,29 @@ import android.graphics.Color;
  * GPL Licence
  */
 
-public class BlobDetection {
+public class BlobDetector {
 
-	private byte[][] COLOUR_ARRAY = {{(byte)103, (byte)121, (byte)255},
-			{(byte)249, (byte)255, (byte)139},
-			{(byte)140, (byte)255, (byte)127},
-			{(byte)167, (byte)254, (byte)255},
-			{(byte)255, (byte)111, (byte)71}};
-
-	private int width;
-	private int height;
-
-	public static int[] labelBuffer;
-	public static int[][] labelBufferCoordinates;
-	public static int[] labelTable;
-	public static int[] xMinTable;
-	public static int[] xMaxTable;
-	public static int[] yMinTable;
-	public static int[] yMaxTable;
-	public static int[] massTable;
-	public static List<Blob> blobList ;
-	public static class Blob
-	{
-		public int xMin;
-		public int xMax;
-		public int yMin;
-		public int yMax;
-		public int mass;
-
-		public Blob(int xMin, int xMax, int yMin, int yMax, int mass)
-		{
-			this.xMin = xMin;
-			this.xMax = xMax;
-			this.yMin = yMin;
-			this.yMax = yMax;
-			this.mass = mass;
-		}
-
-		public String toString()
-		{
-			return String.format("X: %4d -> %4d, Y: %4d -> %4d, mass: %6d", xMin, xMax, yMin, yMax, mass);
-		}
+	private int[] labelBuffer;
+	private int[][] labelBufferCoordinates;
+	private int[] labelTable;
+	private int[] xMinTable;
+	private int[] xMaxTable;
+	private int[] yMinTable;
+	private int[] yMaxTable;
+	private int[] massTable;
+	private BlobList blobList ;
+	private Bitmap source;
+	
+	public  BlobList getBlobList(){
+		return blobList;
 	}
+	
 
 	
-	public BlobDetection(Bitmap bitmap) {
+	public BlobDetector(Bitmap bitmap) {
+		source = bitmap.copy(Bitmap.Config.ARGB_8888, true);;
 		int width = bitmap.getWidth();
 		int height = bitmap.getHeight();
-		this.width = width;
-		this.height = height;
 
 		labelBuffer = new int[width * height];
 		labelBufferCoordinates = new int[width][height];
@@ -75,9 +51,7 @@ public class BlobDetection {
 		yMinTable = new int[tableSize];
 		yMaxTable = new int[tableSize];
 		massTable = new int[tableSize];
-	}
 	
-	public Bitmap  getBlob(Bitmap bitmap) {
 		// This is the neighbouring pixel pattern. For position X, A, B, C & D are checked
 		// A B C
 		// D X
@@ -94,7 +68,7 @@ public class BlobDetection {
 		int maxBlobMass = -1;
 		
 		Blob blobMayor = null;
-		blobList = new ArrayList<Blob>();
+		blobList = new BlobList();
 		
 		//First pass
 		for (int y = 0; y< bitmap.getHeight() ;y++) {
@@ -161,7 +135,7 @@ public class BlobDetection {
 			}
 
 			// Iterate through labels pushing min/max x,y values towards minimum label
-			if (blobList == null) blobList = new ArrayList<Blob>();
+			if (blobList == null) blobList = new BlobList();
 
 			for (int i=label-1 ; i>0 ; i--)
 			{
@@ -194,27 +168,44 @@ public class BlobDetection {
 					}
 				}
 			}
-			int maximoBlob = 0;
-			int posicion = 0;
-			for (int i = 0;i<massTable.length;i++) {
-				if ( massTable[i] > maximoBlob ) {
-					posicion = i;
-					maximoBlob = massTable[i];
-				}
-					
+	}
+	
+	public Mat getAnnotationShaded(){
+		int maximoBlob = 0;
+		int posicion = 0;
+		for (int i = 0;i<massTable.length;i++) {
+			if ( massTable[i] > maximoBlob ) {
+				posicion = i;
+				maximoBlob = massTable[i];
 			}
-			Bitmap finalBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true);
-			for (int y = 0; y< bitmap.getHeight() ;y++) {
-				for (int x = 0;x<bitmap.getWidth();x++ ) {
-					if ( labelTable[labelBufferCoordinates[x][y]] == posicion ) {	
-						finalBitmap.setPixel(x, y, Color.BLACK);	
-					}   else  if ( labelTable[labelBufferCoordinates[x][y]] != 0) {
-						finalBitmap.setPixel(x, y, Color.GREEN);
-					} else {
-						finalBitmap.setPixel(x, y, Color.WHITE);
-					}
+				
+		}
+		
+		Bitmap annotated = source.copy(Bitmap.Config.ARGB_8888, true);
+		for (int y = 0; y< source.getHeight() ;y++) {
+			for (int x = 0;x<source.getWidth();x++ ) {
+				if ( labelTable[labelBufferCoordinates[x][y]] == posicion ) {	
+					annotated.setPixel(x, y, Color.BLACK);	
+				}   else  if ( labelTable[labelBufferCoordinates[x][y]] != 0) {
+					annotated.setPixel(x, y, Color.GREEN);
+				} else {
+					annotated.setPixel(x, y, Color.WHITE);
 				}
 			}
-			return finalBitmap;
+		}
+		return Util.convertToMat(annotated);
+	}
+	
+	
+	public Mat getAnnotationBoxed(){
+		return getAnnotationBoxed(blobList);
+	}
+	
+	public Mat getAnnotationBoxed(BlobList list){
+		Mat annotated = Util.convertToMat(source);
+		for (Blob b : list)  {
+			Core.rectangle(annotated, new Point(b.xMin, b.yMin), new Point(b.xMax, b.yMax), new Scalar(0,155,00), 5);
+		}
+		return annotated;
 	}
 }

@@ -1,46 +1,39 @@
 package com.mikrasov.sensing;
 
-import org.opencv.android.Utils;
-import org.opencv.core.CvType;
 import org.opencv.core.Mat;
-import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
-import android.graphics.Bitmap;
 import android.util.Log;
+
+import com.mikrasov.blobdetect.Blob;
+import com.mikrasov.blobdetect.BlobDetector;
+import com.mikrasov.blobdetect.BlobList;
+import com.mikrasov.blobdetect.Util;
 
 public class BeeDetector {
 
 	private int threshold = 20;	
+	private int minMass = 25, maxMass = 500;
 	
 	public  void proccessFrame(Mat frame){
 		Imgproc.threshold(frame, frame, threshold, 255, Imgproc.THRESH_BINARY);
 
         //Detect Blob
-        BlobDetection blob = new BlobDetection( convertToBitmap(frame) );
-		Bitmap annotated = blob.getBlob( convertToBitmap(frame) );
+        BlobDetector detector = new BlobDetector( Util.convertToBitmap(frame) );
+		//Bitmap annotated = blob.getBlob( convertToBitmap(frame) );
 		
-		Log.v("Image","Found "+blob.blobList.size()+" blobs:\n");
-		for (BlobDetection.Blob blobies : blob.blobList)  {
-			Log.v("Image", blobies.toString());
-		}
+		BlobList blobList = detector.getBlobList().filter(minMass, maxMass);
+
 		
-		( convertToMat(annotated) ).copyTo(frame);
+		Log.v("Image","Found "+blobList.size()+" blobs:\n");
+		
+		
+		
+		(  detector.getAnnotationBoxed(blobList) ).copyTo(frame);
 	}
 	
-	public static Mat convertToMat(Bitmap bitmap){
-        Mat result = new Mat ( bitmap.getHeight(), bitmap.getWidth(), CvType.CV_8U, new Scalar(4));
-        Bitmap myBitmap32 = bitmap.copy(Bitmap.Config.ARGB_8888, true);
-        Utils.bitmapToMat(myBitmap32, result);
-        return result;
-	}
 	
-	public static Bitmap convertToBitmap(Mat frame){
-		Bitmap bitmap = Bitmap.createBitmap(frame.cols(), frame.rows(),Bitmap.Config.ARGB_8888);;
-        Utils.matToBitmap(frame, bitmap);
-        return bitmap;
-	}
-	
+
 	
 	public int getThreshold() {
 		return threshold;
