@@ -200,14 +200,17 @@ public class BlobDetector {
 	
 	
 	public Mat getAnnotationBoxed(){
-		return getAnnotationBoxed(blobList);
+		return getAnnotationBoxed(Util.convertToMat(source), blobList);
 	}
 	
-	public Mat getAnnotationBoxed(BlobList list){
-		Mat annotated = Util.convertToMat(source);
+	public Mat getAnnotationBoxed(Mat image){
+		return getAnnotationBoxed(image, blobList);
+	}
+	
+	public Mat getAnnotationBoxed(Mat image, BlobList list){
 		for (Blob b : list)  {
-			Core.rectangle(annotated, new Point(b.xMin, b.yMin), new Point(b.xMax, b.yMax), new Scalar(0,155,00), 5);
+			Core.rectangle(image, new Point(b.xMin, b.yMin), new Point(b.xMax, b.yMax), new Scalar(0,155,00), 5);
 		}
-		return annotated;
+		return image;
 	}
 }
