@@ -1,4 +1,4 @@
-package com.mikrasov.blobdetect;
+package com.mikrasov.opencv;
 
 import org.opencv.android.Utils;
 import org.opencv.core.CvType;

@@ -1,7 +1,5 @@
 package com.mikrasov.sensing;
 
-import java.io.File;
-
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewFrame;
@@ -12,18 +10,17 @@ import org.opencv.core.Mat;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.os.Environment;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.SurfaceView;
 import android.view.View;
-import android.view.WindowManager;
 import android.view.View.OnTouchListener;
+import android.view.WindowManager;
 import android.widget.SeekBar;
-import android.widget.Toast;
 import android.widget.SeekBar.OnSeekBarChangeListener;
+import android.widget.Toast;
 
 public class BuzzSenseActivity extends Activity implements CvCameraViewListener2, OnSeekBarChangeListener, OnTouchListener {
     private static final String TAG = "OCVSample::Activity";
@@ -32,8 +29,8 @@ public class BuzzSenseActivity extends Activity implements CvCameraViewListener2
     private boolean              mIsJavaCamera = true;
     private MenuItem             mItemSwitchCamera = null;
     
-    private BeeDetector detector = new BeeDetector();
-    private FrameMocker mocker = new FrameMocker();
+    private BeeDetector detector;
+    private FrameMocker mocker;
     
     private SeekBar mSeekBar;
     
@@ -44,9 +41,18 @@ public class BuzzSenseActivity extends Activity implements CvCameraViewListener2
             switch (status) {
                 case LoaderCallbackInterface.SUCCESS:
                 {
+                	//Do code that requires the OpenCV Library
+                	
                     Log.i(TAG, "OpenCV loaded successfully");
+                    detector = new BeeDetector();
+                    mocker = new FrameMocker();
+                    
                     mOpenCvCameraView.enableView();
                     mOpenCvCameraView.setOnTouchListener(BuzzSenseActivity.this);
+                    
+                   
+                    
+                   
                 } break;
                 default:
                 {
@@ -58,6 +64,8 @@ public class BuzzSenseActivity extends Activity implements CvCameraViewListener2
 
     public BuzzSenseActivity() {
         Log.i(TAG, "Instantiated new " + this.getClass());
+        
+
     }
 
     /** Called when the activity is first created. */

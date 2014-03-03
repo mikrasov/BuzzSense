@@ -1,4 +1,4 @@
-package com.mikrasov.blobdetect;
+package com.mikrasov.opencv.blob;
 
 public class Blob {
 

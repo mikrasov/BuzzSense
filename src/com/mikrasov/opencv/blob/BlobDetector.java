@@ -1,9 +1,11 @@
-package com.mikrasov.blobdetect;
+package com.mikrasov.opencv.blob;
 
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
+
+import com.mikrasov.opencv.Util;
 
 import android.graphics.Bitmap;
 import android.graphics.Color;
