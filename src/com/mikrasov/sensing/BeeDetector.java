@@ -14,67 +14,58 @@ import com.mikrasov.opencv.blob.BlobList;
 
 public class BeeDetector {
 
-	private int threshold = 20;	
-	private int minMass = 10, maxMass = 500, minHeight = 5, minWidth = 5, maxHeight =200, maxWidth = 200 ;
+	private int THRESHOLD = 40;
+	private int BG_HISTORY_LENGTH = 50;
+	private double BG_LEARNING_RATE = 0.01;
+	private float BG_THRESHOLD = 10;
+	private boolean BG_SUBTRACT_SHADOW = false;
 	
-	private BackgroundSubtractorMOG2 background = new BackgroundSubtractorMOG2(50, 10, true);
-	private Mat result = new Mat();
+	private int minMass = 10, maxMass = 5000, minHeight = 7, minWidth = 7, maxHeight =400, maxWidth = 400 ;
+	
+	private BackgroundSubtractorMOG2 background = new BackgroundSubtractorMOG2(BG_HISTORY_LENGTH, BG_THRESHOLD, BG_SUBTRACT_SHADOW);
+	private Mat source = new Mat();
+	private Mat intermidiate = new Mat();
 	private Mat bgMask = new Mat();
 	
 
 	
-	public  void proccessFrame(Mat frame){
-		//Imgproc.threshold(frame, frame, threshold, 255, Imgproc.THRESH_BINARY);
+	public  void proccessFrame(Mat original){
 
-		Imgproc.cvtColor(frame, frame, Imgproc.COLOR_RGB2GRAY);
-		Imgproc.equalizeHist(frame, frame);
+		original.copyTo(source);
 		
-		bgMask = new Mat(frame.size(), frame.type());
-		result = new Mat(frame.size(), frame.type());
+		Imgproc.cvtColor(original, original, Imgproc.COLOR_RGB2GRAY);
+		Imgproc.equalizeHist(original, original);
 		
-		result.setTo(new Scalar(255,255,255));
+		bgMask = new Mat(original.size(), original.type());		
+		intermidiate = new Mat(original.size(), original.type());
 		
-		//Imgproc.cvtColor(frame, mRgb, Imgproc.COLOR_GRAY2RGB); //the apply function will throw the above error if you don't feed it an RGB image
-		background.apply(frame, bgMask, 0); //apply() exports a gray image by definition
+		intermidiate.setTo(new Scalar(255,255,255));
+		
+		background.apply(original, bgMask, BG_LEARNING_RATE); //apply() exports a gray image by definition
 
-		//Core.bitwise_and(frame, mFGMask, frame);
-        //Detect Blob
-       
-		//Bitmap annotated = blob.getBlob( convertToBitmap(frame) );
 		
+		original.copyTo(intermidiate, bgMask);
+		Imgproc.threshold(intermidiate, intermidiate, THRESHOLD, 255, Imgproc.THRESH_BINARY);
+		Imgproc.cvtColor(intermidiate, intermidiate, Imgproc.COLOR_GRAY2RGB);
 		
+		BlobDetector detector = new BlobDetector( Util.convertToBitmap(intermidiate) );
+		BlobList blobList = detector.getBlobList().filterMass(minMass, maxMass).filterWidth(minWidth, maxWidth).filterHeight(minHeight, maxHeight);
+		
+		source.copyTo(original);
+		
+		detector.getAnnotationBoxed(original, blobList);
 
-		//Log.v("Image","Found "+blobList.size()+" blobs:\n");
-		
-		
-		//Log.v("IMAGE","SIZE frame:"+frame.size()+" Mask: "+bgMask.size());
-		//detector.getAnnotationBoxed(mFGMask, blobList) ;
-		
-		BlobDetector detector = new BlobDetector( Util.convertToBitmap(result) );
-		BlobList blobList = detector.getBlobList();//.filterMass(minMass, maxMass).filterWidth(minWidth, maxWidth).filterHeight(minHeight, maxHeight);
-		
-		
-		frame.copyTo(result, bgMask);
-		
-		//Core.subtract(result, frame, result, bgMask);
-		result.copyTo(frame);
-		
-		Imgproc.cvtColor(frame, frame, Imgproc.COLOR_GRAY2RGB);
-		
-		
-		detector.getAnnotationBoxed(frame, blobList);
-		
 	}
 	
 	
 
 	
 	public int getThreshold() {
-		return threshold;
+		return THRESHOLD;
 	}
 
 	public void setThreshold(int threshold) {
-		this.threshold = threshold;
+		this.THRESHOLD = threshold;
 	}
 
 
