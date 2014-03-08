@@ -22,7 +22,7 @@ import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.Toast;
 
-public class BuzzSenseActivity extends Activity implements CvCameraViewListener2, OnSeekBarChangeListener, OnTouchListener {
+public class BuzzSenseActivity extends Activity implements CvCameraViewListener2, OnTouchListener {
     private static final String TAG = "OCVSample::Activity";
 
     private CameraBridgeViewBase mOpenCvCameraView;
@@ -31,9 +31,6 @@ public class BuzzSenseActivity extends Activity implements CvCameraViewListener2
     
     private BeeDetector detector;
     private FrameMocker mocker;
-    
-    private SeekBar mSeekBar;
-    
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
@@ -49,9 +46,6 @@ public class BuzzSenseActivity extends Activity implements CvCameraViewListener2
                     
                     mOpenCvCameraView.enableView();
                     mOpenCvCameraView.setOnTouchListener(BuzzSenseActivity.this);
-                    
-                   
-                    
                    
                 } break;
                 default:
@@ -65,7 +59,6 @@ public class BuzzSenseActivity extends Activity implements CvCameraViewListener2
     public BuzzSenseActivity() {
         Log.i(TAG, "Instantiated new " + this.getClass());
         
-
     }
 
     /** Called when the activity is first created. */
@@ -88,16 +81,14 @@ public class BuzzSenseActivity extends Activity implements CvCameraViewListener2
     }
 
     @Override
-    public void onPause()
-    {
+    public void onPause() {
         super.onPause();
         if (mOpenCvCameraView != null)
             mOpenCvCameraView.disableView();
     }
 
     @Override
-    public void onResume()
-    {
+    public void onResume() {
         super.onResume();
         OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_2_4_3, this, mLoaderCallback);
     }
@@ -142,11 +133,9 @@ public class BuzzSenseActivity extends Activity implements CvCameraViewListener2
         return true;
     }
 
-    public void onCameraViewStarted(int width, int height) {
-    }
+    public void onCameraViewStarted(int width, int height) {}
 
-    public void onCameraViewStopped() {
-    }
+    public void onCameraViewStopped() {}
 
     public Mat onCameraFrame(CvCameraViewFrame inputFrame) {
     	Mat frame = inputFrame.rgba();
@@ -164,21 +153,4 @@ public class BuzzSenseActivity extends Activity implements CvCameraViewListener2
         Log.i(TAG,"onTouch event");
         return false;
     }
-
-
-	@Override
-	public void onProgressChanged(SeekBar arg0, int value, boolean arg2) {
-		detector.setThreshold(value);
-	}
-
-	@Override
-	public void onStartTrackingTouch(SeekBar arg0) {
-		// TODO Auto-generated method stub
-	}
-
-	@Override
-	public void onStopTrackingTouch(SeekBar arg0) {
-		// TODO Auto-generated method stub
-	}
-
 }

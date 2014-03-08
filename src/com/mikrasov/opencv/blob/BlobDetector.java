@@ -172,7 +172,8 @@ public class BlobDetector {
 			}
 	}
 	
-	public Mat getAnnotationShaded(){
+	public Mat getAnnotationShaded(Mat image){
+		Bitmap bitImg = Util.convertToBitmap(image);
 		int maximoBlob = 0;
 		int posicion = 0;
 		for (int i = 0;i<massTable.length;i++) {
@@ -183,19 +184,21 @@ public class BlobDetector {
 				
 		}
 		
-		Bitmap annotated = source.copy(Bitmap.Config.ARGB_8888, true);
-		for (int y = 0; y< source.getHeight() ;y++) {
-			for (int x = 0;x<source.getWidth();x++ ) {
+		
+		Bitmap annotated = bitImg.copy(Bitmap.Config.ARGB_8888, true);
+		for (int y = 0; y< bitImg.getHeight() ;y++) {
+			for (int x = 0;x<bitImg.getWidth();x++ ) {
 				if ( labelTable[labelBufferCoordinates[x][y]] == posicion ) {	
-					annotated.setPixel(x, y, Color.BLACK);	
+					annotated.setPixel(x, y, Color.RED);	
 				}   else  if ( labelTable[labelBufferCoordinates[x][y]] != 0) {
 					annotated.setPixel(x, y, Color.GREEN);
 				} else {
-					annotated.setPixel(x, y, Color.WHITE);
+					//annotated.setPixel(x, y, Color.WHITE);
 				}
 			}
 		}
-		return Util.convertToMat(annotated);
+		Util.convertToMat(annotated).copyTo(image);
+		return image;
 	}
 	
 	
@@ -209,8 +212,14 @@ public class BlobDetector {
 	
 	public Mat getAnnotationBoxed(Mat image, BlobList list){
 		for (Blob b : list)  {
-			Core.rectangle(image, new Point(b.xMin, b.yMin), new Point(b.xMax, b.yMax), new Scalar(0,155,00), 5);
+			Core.rectangle(image, new Point(b.xMin, b.yMin), new Point(b.xMax, b.yMax), new Scalar(255,0,255), 2);
 		}
+		return image;
+	}
+	
+	public Mat getAnnotationText(Mat image, BlobList list){
+		for (Blob b : list)  {
+			Core.putText(image, "TEXT", new Point(b.xMax,b.yMin), Core.FONT_HERSHEY_PLAIN, 1, new Scalar(255,0,255) );		}
 		return image;
 	}
 }
