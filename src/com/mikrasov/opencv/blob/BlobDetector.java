@@ -1,14 +1,11 @@
 package com.mikrasov.opencv.blob;
 
-import org.opencv.core.Core;
 import org.opencv.core.Mat;
-import org.opencv.core.Point;
-import org.opencv.core.Scalar;
-
-import com.mikrasov.opencv.Util;
 
 import android.graphics.Bitmap;
 import android.graphics.Color;
+
+import com.mikrasov.opencv.Util;
 
 /*
  * CV Blob Library
@@ -202,24 +199,5 @@ public class BlobDetector {
 	}
 	
 	
-	public Mat getAnnotationBoxed(){
-		return getAnnotationBoxed(Util.convertToMat(source), blobList);
-	}
-	
-	public Mat getAnnotationBoxed(Mat image){
-		return getAnnotationBoxed(image, blobList);
-	}
-	
-	public Mat getAnnotationBoxed(Mat image, BlobList list){
-		for (Blob b : list)  {
-			Core.rectangle(image, new Point(b.xMin, b.yMin), new Point(b.xMax, b.yMax), new Scalar(255,0,255), 2);
-		}
-		return image;
-	}
-	
-	public Mat getAnnotationText(Mat image, BlobList list){
-		for (Blob b : list)  {
-			Core.putText(image, "TEXT", new Point(b.xMax,b.yMin), Core.FONT_HERSHEY_PLAIN, 1, new Scalar(255,0,255) );		}
-		return image;
-	}
+
 }
