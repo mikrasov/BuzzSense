@@ -19,12 +19,12 @@ public class FrameMocker {
 		sampleImages = new File(Environment.getExternalStorageDirectory().getAbsoluteFile()+"/media/samples/").listFiles();
 	}
 	
-    public void getNextFrame(Mat frameToReplace) {
+    public File getNextFrame(Mat frameToReplace) {
 		
     	//Error Case
     	if(sampleImages.length <= 0){
     		Log.e("Image", "No sample images dound");
-    		return;
+    		return null;
     	}
     	
     	if(sampleImageNum +1 < sampleImages.length)sampleImageNum++;    	
@@ -36,6 +36,7 @@ public class FrameMocker {
 		Imgproc.resize(img, frameToReplace, frameToReplace.size());
 			
 		Log.d("FILE","Loading file "+filePath);
+		return sampleImages[sampleImageNum];
     }
 
 }

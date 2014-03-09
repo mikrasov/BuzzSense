@@ -1,5 +1,11 @@
 package com.mikrasov.opencv;
 
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
 import org.opencv.android.Utils;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -23,5 +29,30 @@ public class Util {
         return bitmap;
 	}
 	
+	public static void saveImageToDisk(Mat source, File targetFile){
+
+        Mat mat = source.clone();
+
+        Bitmap bmpOut = Bitmap.createBitmap(mat.cols(), mat.rows(), Bitmap.Config.ARGB_8888);
+        Utils.matToBitmap(mat, bmpOut);
+        if (bmpOut != null){
+
+            try {
+            	FileOutputStream fout = new FileOutputStream(targetFile);
+                BufferedOutputStream bos = new BufferedOutputStream(fout);
+                bmpOut.compress(Bitmap.CompressFormat.JPEG, 100, bos);
+                bos.flush();
+                bos.close();
+                bmpOut.recycle();
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+
+            catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        bmpOut.recycle();
+    }
 
 }

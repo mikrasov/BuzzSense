@@ -1,11 +1,20 @@
 package com.mikrasov.sensing;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
+import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.video.BackgroundSubtractorMOG2;
+
+import android.os.Environment;
+import android.util.Log;
 
 import com.mikrasov.opencv.Util;
 import com.mikrasov.opencv.blob.Blob;
@@ -28,7 +37,19 @@ public class BeeDetector {
 	private Mat bgMask = new Mat();
 	private Mat source = new Mat();
 	
+	private BufferedWriter log;
+	public BeeDetector(){
+		try {
+			log = new BufferedWriter(new FileWriter(new File(Environment.getExternalStorageDirectory().getAbsoluteFile()+"/media/processed/out.txt")));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 	public void proccessFrame(Mat original){
+		proccessFrame(original, System.currentTimeMillis()+"");
+	}
+	
+	public void proccessFrame(Mat original, String filename){
 
 		original.copyTo(source);
 
@@ -58,15 +79,30 @@ public class BeeDetector {
 		
 		source.copyTo(original);
 		
+		//count
 		int numBees = 0;
 		for(Blob b: blobList)
 			numBees += count(b);
+		
+		
+		//Write to Log
+		try {
+			log.write(filename+","+numBees+"\n");
+			log.flush();
+		} catch (IOException e) {}
 		
 		//annotate
 		//detector.getAnnotationShaded(original);
 		getAnnotationBoxed(original, blobList);
 		getAnnotationText(original, blobList);
 		Core.putText(original, numBees+"", new Point(100,100), Core.FONT_HERSHEY_COMPLEX, 3, new Scalar(0,255,0) );	
+		
+		
+		//Save files
+		File path = new File(Environment.getExternalStorageDirectory().getAbsoluteFile()+"/media/processed/");
+        path.mkdirs();
+        //Util.saveImageToDisk(source,  new File(path, filename+"_org.jpg"));
+        Util.saveImageToDisk(original,  new File(path, filename+"_ano.jpg"));
 	}
 	
 	public Mat getAnnotationBoxed(Mat image, BlobList list){
@@ -87,7 +123,7 @@ public class BeeDetector {
 	
 
 	private int count(Blob b){
-		return (int) Math.ceil(b.mass/180.0);
+		return (int) Math.round(b.mass/180.0);
 	}
 
 }

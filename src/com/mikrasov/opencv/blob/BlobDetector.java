@@ -178,9 +178,7 @@ public class BlobDetector {
 				posicion = i;
 				maximoBlob = massTable[i];
 			}
-				
 		}
-		
 		
 		Bitmap annotated = bitImg.copy(Bitmap.Config.ARGB_8888, true);
 		for (int y = 0; y< bitImg.getHeight() ;y++) {
@@ -198,6 +196,4 @@ public class BlobDetector {
 		return image;
 	}
 	
-	
-
 }

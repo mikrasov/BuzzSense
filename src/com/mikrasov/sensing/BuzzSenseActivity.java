@@ -1,5 +1,7 @@
 package com.mikrasov.sensing;
 
+import java.io.File;
+
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewFrame;
@@ -18,8 +20,6 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.View.OnTouchListener;
 import android.view.WindowManager;
-import android.widget.SeekBar;
-import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.Toast;
 
 public class BuzzSenseActivity extends Activity implements CvCameraViewListener2, OnTouchListener {
@@ -129,7 +129,6 @@ public class BuzzSenseActivity extends Activity implements CvCameraViewListener2
             Toast toast = Toast.makeText(this, toastMesage, Toast.LENGTH_LONG);
             toast.show();
         }
-
         return true;
     }
 
@@ -141,12 +140,11 @@ public class BuzzSenseActivity extends Activity implements CvCameraViewListener2
     	Mat frame = inputFrame.rgba();
     	
     	//Replace Frame
-        mocker.getNextFrame(frame);
+        String filename=  mocker.getNextFrame(frame).getName();
 
-        detector.proccessFrame(frame);
+        detector.proccessFrame(frame, filename);
         return frame;
     }
-    
     
     @Override
     public boolean onTouch(View v, MotionEvent event) {
