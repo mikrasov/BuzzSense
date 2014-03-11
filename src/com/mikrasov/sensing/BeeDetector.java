@@ -9,12 +9,10 @@ import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
-import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.video.BackgroundSubtractorMOG2;
 
 import android.os.Environment;
-import android.util.Log;
 
 import com.mikrasov.opencv.Util;
 import com.mikrasov.opencv.blob.Blob;
@@ -30,6 +28,9 @@ public class BeeDetector {
 	private boolean BG_SUBTRACT_SHADOW = false;
 	
 	private int minMass = 50, maxMass = 5000, minHeight = 10, minWidth = 10, maxHeight =900, maxWidth = 900 ;
+	
+	private long totalproccessingTime = 0;
+	private long numFrames = 0;
 	
 	private BackgroundSubtractorMOG2 background = new BackgroundSubtractorMOG2(BG_HISTORY_LENGTH, BG_THRESHOLD, BG_SUBTRACT_SHADOW);
 	
@@ -50,7 +51,8 @@ public class BeeDetector {
 	}
 	
 	public void proccessFrame(Mat original, String filename){
-
+		long startTime = System.currentTimeMillis();
+		
 		original.copyTo(source);
 
 		//Normalize
@@ -63,14 +65,23 @@ public class BeeDetector {
 		
 		intermidiate.setTo(new Scalar(255,255,255));
 		
+		//Background Subtraction
 		background.apply(original, bgMask, BG_LEARNING_RATE); //apply() exports a gray image by definition
 
+
 		
+		
+		//Apply BG Mask
 		original.copyTo(intermidiate, bgMask);
+		
+		
+		
+		//Applies Binary Thresholding
 		Imgproc.threshold(intermidiate, intermidiate, THRESHOLD, 255, Imgproc.THRESH_BINARY);
 		//Imgproc.adaptiveThreshold(intermidiate, intermidiate,255,Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 37, 77);
 		
 		//intermidiate.copyTo(source);
+		
 		
 		Imgproc.cvtColor(intermidiate, intermidiate, Imgproc.COLOR_GRAY2RGB);
 		
@@ -84,10 +95,17 @@ public class BeeDetector {
 		for(Blob b: blobList)
 			numBees += count(b);
 		
+		//Calc runtime and average frame rate
+		long endTime = System.currentTimeMillis();
+		long proccessingTime = endTime - startTime;
+		totalproccessingTime += proccessingTime;
+		numFrames++;
+		double frameRate = numFrames/((double)totalproccessingTime/1000);
+		
 		
 		//Write to Log
 		try {
-			log.write(filename+","+numBees+"\n");
+			log.write(filename+","+numBees+","+proccessingTime+"\n");
 			log.flush();
 		} catch (IOException e) {}
 		
@@ -95,7 +113,8 @@ public class BeeDetector {
 		//detector.getAnnotationShaded(original);
 		getAnnotationBoxed(original, blobList);
 		getAnnotationText(original, blobList);
-		Core.putText(original, numBees+"", new Point(100,100), Core.FONT_HERSHEY_COMPLEX, 3, new Scalar(0,255,0) );	
+		Core.putText(original, numBees+"", new Point(50,75), Core.FONT_HERSHEY_COMPLEX, 3, new Scalar(0,255,0) );	
+		Core.putText(original, String.format("%.1f", frameRate)+"fps", new Point(750,50), Core.FONT_HERSHEY_COMPLEX, 1.8, new Scalar(255,255,0) );	
 		
 		
 		//Save files
@@ -115,7 +134,7 @@ public class BeeDetector {
 	public Mat getAnnotationText(Mat image, BlobList list){
 		
 		for (Blob b : list)  {
-			Core.putText(image, b.mass +"", new Point(b.xMax,b.yMax), Core.FONT_HERSHEY_PLAIN, 1.5, new Scalar(255,0,255) );		
+			Core.putText(image, b.mass +"", new Point(b.xMax,b.yMax), Core.FONT_HERSHEY_PLAIN, 1.5, new Scalar(255,255,0) );		
 			Core.putText(image, count(b)+"", new Point(b.xMax,b.yMin), Core.FONT_HERSHEY_PLAIN, 1.5, new Scalar(0,255,0) );		
 		}
 		return image;
