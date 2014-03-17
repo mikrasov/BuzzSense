@@ -1,31 +1,70 @@
 package com.mikrasov.opencv.blob;
 
+import org.opencv.core.Core;
+import org.opencv.core.Mat;
+import org.opencv.core.MatOfPoint;
+import org.opencv.core.Point;
+import org.opencv.core.Rect;
+import org.opencv.core.Scalar;
+import org.opencv.imgproc.Imgproc;
+
 public class Blob {
 
-	public final int xMin;
-	public final int xMax;
-	public final int yMin;
-	public final int yMax;
-	public final int mass;
-
-	public Blob(int xMin, int xMax, int yMin, int yMax, int mass){
-		this.xMin = xMin;
-		this.xMax = xMax;
-		this.yMin = yMin;
-		this.yMax = yMax;
-		this.mass = mass;
-	}
-
-	public Blob(Blob blob){
-		this.xMin = blob.xMin;
-		this.xMax = blob.xMax;
-		this.yMin = blob.yMin;
-		this.yMax = blob.yMax;
-		this.mass = blob.mass;
+	private final MatOfPoint contour;
+	private Rect boundingBox;
+	private double area = -1;
+	
+	public Blob(MatOfPoint contour) {
+		this.contour = contour;
 	}
 	
-	public String toString() {
-		return String.format("X: %4d -> %4d, Y: %4d -> %4d, mass: %6d", xMin, xMax, yMin, yMax, mass);
+	public double getArea(){
+		if(area < 0)
+			area = Imgproc.contourArea(contour);
+		return area;
+	}
+	
+	public Point getMin(){
+		return new Point(getMinX(),getMinY());
+	}
+	public Point getMax(){
+		return new Point(getMaxX(),getMaxY());
+	}
+	
+	public int getMinX(){
+		return getBoundingBox().x;
+	}
+	
+	public int getMinY(){
+		return getBoundingBox().y;
+	}
+	
+	public int getMaxX(){
+		return getBoundingBox().x+getBoundingBox().width;
+	}
+	
+	public int getMaxY(){
+		return getBoundingBox().y+getBoundingBox().height;
 	}
 
+	public int getWidth(){
+		return getBoundingBox().width;
+	}
+	
+	public int getHeight(){
+		return getBoundingBox().height;
+	}
+	public MatOfPoint getContour(){
+		return contour;
+	}
+	
+	private Rect getBoundingBox(){
+		if(boundingBox == null) 
+			boundingBox = Imgproc.boundingRect(contour);
+		return boundingBox;
+	}
+	
+	public void annotateBounds(Mat image, Scalar color, int width){
+		Core.rectangle(image, getMin(), getMax(), color, width); 
+	}
 }

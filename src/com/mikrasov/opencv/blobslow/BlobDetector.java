@@ -1,4 +1,4 @@
-package com.mikrasov.opencv.blob;
+package com.mikrasov.opencv.blobslow;
 
 import org.opencv.core.Mat;
 
@@ -8,7 +8,7 @@ import android.graphics.Color;
 import com.mikrasov.opencv.Util;
 
 /*
- * CV Blob Library
+ * Based on CV Blob Library
  * https://code.google.com/p/cvblob-for-android/
  * GPL Licence
  */
@@ -24,16 +24,12 @@ public class BlobDetector {
 	private int[] yMaxTable;
 	private int[] massTable;
 	private BlobList blobList ;
-	private Bitmap source;
 	
 	public  BlobList getBlobList(){
 		return blobList;
 	}
 	
-
-	
-	public BlobDetector(Bitmap bitmap) {
-		source = bitmap.copy(Bitmap.Config.ARGB_8888, true);;
+	public BlobDetector(Bitmap bitmap, int minBlobMass, int maxBlobMass) {
 		int width = bitmap.getWidth();
 		int height = bitmap.getHeight();
 
@@ -62,9 +58,6 @@ public class BlobDetector {
 		int dPtr = -1;
 
 		int label = 1;
-
-		int minBlobMass = 0;
-		int maxBlobMass = -1;
 		
 		Blob blobMayor = null;
 		blobList = new BlobList();
@@ -78,9 +71,9 @@ public class BlobDetector {
 					labelBufferCoordinates[x][y] = 0;
 					// Find label for neighbours (0 if out of range)
 					int aLabel = (x > 0 && y > 0)			? labelTable[labelBuffer[aPtr]] : 0;
-					int bLabel = (y > 0)						? labelTable[labelBuffer[bPtr]] : 0;
-					int cLabel = (x < width-1 && y > 0)	? labelTable[labelBuffer[cPtr]] : 0;
-					int dLabel = (x > 0)						? labelTable[labelBuffer[dPtr]] : 0;
+					int bLabel = (y > 0)					? labelTable[labelBuffer[bPtr]] : 0;
+					int cLabel = (x < width-1 && y > 0)		? labelTable[labelBuffer[cPtr]] : 0;
+					int dLabel = (x > 0)					? labelTable[labelBuffer[dPtr]] : 0;
 
 					// Look for label with least value
 					int min = Integer.MAX_VALUE;
@@ -106,7 +99,7 @@ public class BlobDetector {
 						label ++;
 					}
 
-					// Neighbour found
+					// Neighbor found
 					else
 					{
 						// Label pixel with lowest label from neighbours	
