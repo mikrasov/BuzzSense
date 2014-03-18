@@ -1,7 +1,5 @@
 package com.mikrasov.sensing;
 
-import java.io.File;
-
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewFrame;
@@ -43,6 +41,7 @@ public class BuzzSenseActivity extends Activity implements CvCameraViewListener2
                     Log.i(TAG, "OpenCV loaded successfully");
                     detector = new BeeDetector();
                     mocker = new FrameMocker();
+                    mocker.start();
                     
                     mOpenCvCameraView.enableView();
                     mOpenCvCameraView.setOnTouchListener(BuzzSenseActivity.this);
